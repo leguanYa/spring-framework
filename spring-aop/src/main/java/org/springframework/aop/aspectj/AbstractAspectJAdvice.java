@@ -629,6 +629,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		if (this.aspectJAdviceMethod.getParameterCount() == 0) {
 			actualArgs = null;
 		}
+		//反射调用aspeectJAdviceMethod方法
 		try {
 			ReflectionUtils.makeAccessible(this.aspectJAdviceMethod);
 			return this.aspectJAdviceMethod.invoke(this.aspectInstanceFactory.getAspectInstance(), actualArgs);

@@ -65,10 +65,13 @@ public abstract class CoroutinesUtils {
 				(scope, continuation) -> MonoKt.awaitSingleOrNull(source, continuation));
 	}
 
+
+
 	/**
 	 * Invoke a suspending function and converts it to {@link Mono} or
 	 * {@link Flux}.
 	 */
+	@SuppressWarnings("deprecation")
 	public static Publisher<?> invokeSuspendingFunction(Method method, Object target, Object... args) {
 		KFunction<?> function = Objects.requireNonNull(ReflectJvmMapping.getKotlinFunction(method));
 		if (method.isAccessible() && !KCallablesJvm.isAccessible(function)) {

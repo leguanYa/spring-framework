@@ -134,6 +134,7 @@ class ConstructorResolver {
 		ArgumentsHolder argsHolderToUse = null;
 		Object[] argsToUse = null;
 
+		//如果getBean()传入了args,那构造方法要用的入参就直接确定好了
 		if (explicitArgs != null) {
 			argsToUse = explicitArgs;
 		}
@@ -154,8 +155,10 @@ class ConstructorResolver {
 			}
 		}
 
+		//如果没有确定要使用的构造方法，或者确定了构造方法但是所要传入的参数没有确定
 		if (constructorToUse == null || argsToUse == null) {
 			// Take specified constructors, if any.
+			//如果没有指定构造方法，那就获取beanClass中的所有构造方法所谓候选者
 			Constructor<?>[] candidates = chosenCtors;
 			if (candidates == null) {
 				Class<?> beanClass = mbd.getBeanClass();
