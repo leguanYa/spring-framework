@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+}
+
+sourceCompatibility=1.8
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+apply plugin: "groovy"
+apply plugin: "kotlin"
+
+
+dependencies {
+
+    implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.22'
+    api(project(":spring-beans"))
+    api(project(":spring-core"))
+    api(project(":spring-aop"))
+    api(project(":spring-context"))
+    api(project(":spring-jdbc"))
+}
+
