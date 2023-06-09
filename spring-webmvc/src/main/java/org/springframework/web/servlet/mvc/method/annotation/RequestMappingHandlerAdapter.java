@@ -805,6 +805,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 		else {
 			// No synchronization on session demanded at all...
+			// 调用方法
 			mav = invokeHandlerMethod(request, response, handlerMethod);
 		}
 
@@ -891,7 +892,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				});
 				invocableMethod = invocableMethod.wrapConcurrentResult(result);
 			}
-
+			// 调用
 			invocableMethod.invokeAndHandle(webRequest, mavContainer);
 			if (asyncManager.isConcurrentHandlingStarted()) {
 				return null;

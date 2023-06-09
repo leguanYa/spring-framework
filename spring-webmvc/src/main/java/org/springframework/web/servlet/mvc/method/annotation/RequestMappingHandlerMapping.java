@@ -201,7 +201,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			this.config.setRegisteredSuffixPatternMatch(useRegisteredSuffixPatternMatch());
 			this.config.setPathMatcher(getPathMatcher());
 		}
-
+		// 调用
 		super.afterPropertiesSet();
 	}
 
@@ -281,6 +281,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	@Override
 	@Nullable
 	protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
+		// 如果方法上面有@RequestMapping：解析出RequestMappingInfo
+		// RequestMappingInfo 是用来在请求的时候做匹对的
 		RequestMappingInfo info = createRequestMappingInfo(method);
 		if (info != null) {
 			RequestMappingInfo typeInfo = createRequestMappingInfo(handlerType);
@@ -318,9 +320,12 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	@Nullable
 	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
+		// 获取RequestMapping注解
 		RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.class);
+		// 获取请求调解：【可扩展】，如果有：该条件会在请求时匹对
 		RequestCondition<?> condition = (element instanceof Class ?
 				getCustomTypeCondition((Class<?>) element) : getCustomMethodCondition((Method) element));
+		// 如果有RequestMapping注解，封装成RequestMappingInfo
 		return (requestMapping != null ? createRequestMappingInfo(requestMapping, condition) : null);
 	}
 

@@ -220,11 +220,14 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @see #handlerMethodsInitialized
 	 */
 	protected void initHandlerMethods() {
+		// 获得所有的候选beanName 当前容器所有的
 		for (String beanName : getCandidateBeanNames()) {
 			if (!beanName.startsWith(SCOPED_TARGET_NAME_PREFIX)) {
+				// 处理候选bean-即极细@RequestMapping和映射路径
 				processCandidateBean(beanName);
 			}
 		}
+		// 解析完所有@RequestMapping的时候使用
 		handlerMethodsInitialized(getHandlerMethods());
 	}
 
@@ -262,7 +265,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				logger.trace("Could not resolve type for bean '" + beanName + "'", ex);
 			}
 		}
+		// 是否有Controller或RequestMapping注解
 		if (beanType != null && isHandler(beanType)) {
+			// 解析HandlerMethods
 			detectHandlerMethods(beanName);
 		}
 	}
@@ -278,6 +283,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		if (handlerType != null) {
 			Class<?> userType = ClassUtils.getUserClass(handlerType);
+			// 循环所有的方法
 			Map<Method, T> methods = MethodIntrospector.selectMethods(userType,
 					(MethodIntrospector.MetadataLookup<T>) method -> {
 						try {
@@ -377,9 +383,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	@Override
 	@Nullable
 	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
+		// 通过UrlPathHelper对象，用于来解析从request中解析出请求映射地址
 		String lookupPath = initLookupPath(request);
 		this.mappingRegistry.acquireReadLock();
 		try {
+			// 通过lookupPath解析最终的handler-HandlerMethod对象
 			HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
 			return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);
 		}
@@ -400,22 +408,35 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	@Nullable
 	protected HandlerMethod lookupHandlerMethod(String lookupPath, HttpServletRequest request) throws Exception {
 		List<Match> matches = new ArrayList<>();
+		// 根据uri从mappingRegistry、pathLookUp获取RequestMappingInfo
+		// pathLookUp<path, RequestMappingInfo>会在初始化阶段解析好
 		List<T> directPathMatches = this.mappingRegistry.getMappingsByDirectPath(lookupPath);
 		if (directPathMatches != null) {
+			// 如果根据path能直接匹配到RequestMappingInfo则用该mapping进行匹配其他条件
 			addMatchingMappings(directPathMatches, matches, request);
 		}
 		if (matches.isEmpty()) {
+			// 如果无path匹配用所有的RequestMappingInfo通过AntPathMatcher匹配
 			addMatchingMappings(this.mappingRegistry.getRegistrations().keySet(), matches, request);
 		}
 		if (!matches.isEmpty()) {
+			// 选择第一个为最匹配的
 			Match bestMatch = matches.get(0);
+
+			// 如果匹配到多个
 			if (matches.size() > 1) {
+
+				// 创建MatchComparator的匹配器对象
 				Comparator<Match> comparator = new MatchComparator(getMappingComparator(request));
+				// 根据精准度排序
 				matches.sort(comparator);
+
+				// 排序完后拿到优先级最高的
 				bestMatch = matches.get(0);
 				if (logger.isTraceEnabled()) {
 					logger.trace(matches.size() + " matching mappings: " + matches);
 				}
+				// 是否配置CORS并且匹配
 				if (CorsUtils.isPreFlightRequest(request)) {
 					for (Match match : matches) {
 						if (match.hasCorsConfig()) {

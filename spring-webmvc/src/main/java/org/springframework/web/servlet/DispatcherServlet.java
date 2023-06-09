@@ -1045,6 +1045,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				multipartRequestParsed = (processedRequest != request);
 
 				// Determine handler for the current request.
+				// 1、找到对应的Handler（请求映射）
 				mappedHandler = getHandler(processedRequest);
 				if (mappedHandler == null) {
 					noHandlerFound(processedRequest, response);
@@ -1052,6 +1053,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 
 				// Determine handler adapter for the current request.
+				// 2、找到对应的适配器
 				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 
 				// Process last-modified header, if supported by the handler.
@@ -1063,19 +1065,21 @@ public class DispatcherServlet extends FrameworkServlet {
 						return;
 					}
 				}
-
+				// 3、调用拦截器的前置处理，返回false直接不用处理了
 				if (!mappedHandler.applyPreHandle(processedRequest, response)) {
 					return;
 				}
 
 				// Actually invoke the handler.
+				// 处理
 				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
 				if (asyncManager.isConcurrentHandlingStarted()) {
 					return;
 				}
-
+				// 如果mv有，视图没有，设置默认视图
 				applyDefaultViewName(processedRequest, mv);
+				// 后置拦截器
 				mappedHandler.applyPostHandle(processedRequest, response, mv);
 			}
 			catch (Exception ex) {
@@ -1086,6 +1090,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				// making them available for @ExceptionHandler methods and other scenarios.
 				dispatchException = new NestedServletException("Handler dispatch failed", err);
 			}
+			// 渲染视图
 			processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
 		}
 		catch (Exception ex) {
@@ -1132,7 +1137,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			@Nullable Exception exception) throws Exception {
 
 		boolean errorView = false;
-
+		// 异常视图
 		if (exception != null) {
 			if (exception instanceof ModelAndViewDefiningException) {
 				logger.debug("ModelAndViewDefiningException encountered", exception);
@@ -1165,6 +1170,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		if (mappedHandler != null) {
 			// Exception (if any) is already handled..
+			// 拦截器
 			mappedHandler.triggerAfterCompletion(request, response, null);
 		}
 	}
@@ -1379,6 +1385,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		String viewName = mv.getViewName();
 		if (viewName != null) {
 			// We need to resolve the view name.
+			// 需要解析视图名称
 			view = resolveViewName(viewName, mv.getModelInternal(), locale, request);
 			if (view == null) {
 				throw new ServletException("Could not resolve view with name '" + mv.getViewName() +
