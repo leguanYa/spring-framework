@@ -558,6 +558,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @see #setContextConfigLocation
 	 */
 	protected WebApplicationContext initWebApplicationContext() {
+		// 调用刚才在servlet域中设置根容器（在子容器就可以直接拿到了） （org.springframework.web.context.ContextLoader.initWebApplicationContext）
 		WebApplicationContext rootContext =
 				WebApplicationContextUtils.getWebApplicationContext(getServletContext());
 		WebApplicationContext wac = null;
@@ -575,6 +576,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 						// the root application context (if any; may be null) as the parent
 						cwac.setParent(rootContext);
 					}
+					// 配置刷新子容器
 					configureAndRefreshWebApplicationContext(cwac);
 				}
 			}
@@ -687,6 +689,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		wac.setServletContext(getServletContext());
 		wac.setServletConfig(getServletConfig());
 		wac.setNamespace(getNamespace());
+		// 监听器
 		wac.addApplicationListener(new SourceFilteringListener(wac, new ContextRefreshListener()));
 
 		// The wac environment's #initPropertySources will be called in any case when the context
@@ -839,6 +842,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		this.refreshEventReceived = true;
 		synchronized (this.onRefreshMonitor) {
+			// 启动完之后，会有事件发送，加载handlerMapping handlerAdapter 设置对应的组件
 			onRefresh(event.getApplicationContext());
 		}
 	}

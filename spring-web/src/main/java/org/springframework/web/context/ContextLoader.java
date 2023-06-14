@@ -278,6 +278,7 @@ public class ContextLoader {
 					configureAndRefreshWebApplicationContext(cwac, servletContext);
 				}
 			}
+			// 在servlet域中设置根容器（在子容器就可以直接拿到了）
 			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.context);
 
 			ClassLoader ccl = Thread.currentThread().getContextClassLoader();
@@ -381,7 +382,9 @@ public class ContextLoader {
 			}
 		}
 
+		// 设置servletContext到spring上下文
 		wac.setServletContext(sc);
+		// 获得servlet容器中的全局参数contextConfigLoaction （xml）
 		String configLocationParam = sc.getInitParameter(CONFIG_LOCATION_PARAM);
 		if (configLocationParam != null) {
 			wac.setConfigLocation(configLocationParam);
@@ -396,6 +399,7 @@ public class ContextLoader {
 		}
 
 		customizeContext(sc, wac);
+		// 刷新容器
 		wac.refresh();
 	}
 
